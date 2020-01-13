@@ -14,6 +14,7 @@ const defaultOpts = {
   markdownOptions: {},
   extension: '.svexy',
   outputMeta: './',
+  forceRewriteMeta: false,
 };
 
 export interface svexOptions {
@@ -22,6 +23,7 @@ export interface svexOptions {
   extension?: string;
   layout?: boolean | string;
   outputMeta?: string | Function;
+  forceRewriteMeta?: boolean;
 }
 
 export function mdsvex({
@@ -30,6 +32,7 @@ export function mdsvex({
   extension = '.svexy',
   layout,
   outputMeta = './',
+  forceRewriteMeta = false,
 }: svexOptions = defaultOpts) {
   // this allows the user to modify the instance of markdown-it
   // necessary if they want to add custom plugins, etc.
@@ -83,7 +86,7 @@ export function mdsvex({
                 ? outputMeta(filename.replace(extension, '.json'))
                 : outputMeta + filename.replace(extension, '.json');
 
-              if (!fs.existsSync(path)) {
+              if (forceRewriteMeta || !fs.existsSync(path)) {
                 const dir = path.substring(0, path.lastIndexOf("/"));
                 fs.mkdirSync(dir, { recursive: true });
 
