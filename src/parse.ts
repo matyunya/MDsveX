@@ -13,7 +13,7 @@ const defaultOpts = {
   parser: md => md,
   markdownOptions: {},
   extension: '.svexy',
-  outputMeta: false,
+  outputMeta: './',
 };
 
 export interface svexOptions {
@@ -21,7 +21,7 @@ export interface svexOptions {
   markdownOptions?: object;
   extension?: string;
   layout?: boolean | string;
-  outputMeta?: boolean;
+  outputMeta?: string | Function;
 }
 
 export function mdsvex({
@@ -29,7 +29,7 @@ export function mdsvex({
   markdownOptions = {},
   extension = '.svexy',
   layout,
-  outputMeta = false,
+  outputMeta = './',
 }: svexOptions = defaultOpts) {
   // this allows the user to modify the instance of markdown-it
   // necessary if they want to add custom plugins, etc.
@@ -78,14 +78,23 @@ export function mdsvex({
 
             modules += `export const _metadata = ${json};`;
 
-            if (outputMeta && !fs.existsSync(filename.replace(extension, '.json'))) {
-              fs.writeFile(
-                filename.replace(extension, '.json'),
-                json,
-                (err) => {
-                  if (err) throw err;
-                }
-              );
+            if (outputMeta) {
+              const path = typeof outputMeta === 'function'
+                ? outputMeta(filename.replace(extension, '.json'))
+                : outputMeta + filename.replace(extension, '.json');
+
+              if (!fs.existsSync(path)) {
+                const dir = path.substring(0, path.lastIndexOf("/"));
+                fs.mkdirSync(dir, { recursive: true });
+
+                fs.writeFile(
+                  path,
+                  json,
+                  (err) => {
+                    if (err) throw err;
+                  }
+                );
+              } 
             }
           }
 
