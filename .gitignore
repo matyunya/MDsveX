@@ -7,8 +7,6 @@
 # duh
 /node_modules/
 
-# build
-dist
 
 # logs
 logs
